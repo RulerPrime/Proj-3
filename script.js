@@ -1,29 +1,47 @@
 // Set up WebAudio API context
+//-------------------------------------------------------------------------------------------------
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
+//-------------------------------------------------------------------------------------------------
 // Create the master gain node
+//-------------------------------------------------------------------------------------------------
 const masterGain = audioContext.createGain();
 masterGain.connect(audioContext.destination);
+//-------------------------------------------------------------------------------------------------
+// Create Variables (Oscillators)
+//-------------------------------------------------------------------------------------------------
+let carrierOscillator;
+let modulatorOscillator;
+let ringModulator;
 
-// Create oscillators
-let carrierOscillator, modulatorOscillator, ringModulator;
-
+//-------------------------------------------------------------------------------------------------
 // Set up user interface controls
-const frequencyControl = document.getElementById("frequency");
-const modulatorFrequencyControl = document.getElementById(
-  "modulator-frequency"
-);
-const masterGainControl = document.getElementById("master-gain");
+//-------------------------------------------------------------------------------------------------
+//START BUTTON
 const startButton = document.getElementById("startButton");
-
-// Frequency display
-const frequencyValue = document.getElementById("frequency-value");
+//-------------------------------------------------------------------------------------------------
+//SLIDER
+//-------------------------------------------------------------------------------------------------
+//SLIDER: CARRIER FREQ
+const frequencyControl = document.getElementById("frequency");
+const modulatorFrequencyControl = document.getElementById("modulatorFrequency"); //id mismatch!
+//SLIDER: MASTER GAIN
+const masterGainControl = document.getElementById("masterFader"); //id mismatch!
+//-------------------------------------------------------------------------------------------------
+//NUMBERS/LABELS
+//-------------------------------------------------------------------------------------------------
+//NUMBER/LABEL: CARRIER FREQ
+const frequencyValue = document.getElementById("frequencyLabel"); //id mismatch!
+//NUMBER/LABEL: MODULATOR FREQ SLIDER
 const modulatorFrequencyValue = document.getElementById(
-  "modulator-frequency-value"
-);
-const masterGainValue = document.getElementById("master-gain-value");
+  "modulatorFrequencyLabel"
+); //id mismatch!
+//NUMBER/LABEL: MASTER GAIN
+const masterGainValue = document.getElementById("fadeLabel"); //id mismatch!
 
+//------------------------------------------------------------------
 // Update displayed values when sliders are adjusted
+//------------------------------------------------------------------
+//CARRIER FREQ
 frequencyControl.addEventListener("input", () => {
   frequencyValue.textContent = frequencyControl.value;
   if (carrierOscillator) {
@@ -33,7 +51,8 @@ frequencyControl.addEventListener("input", () => {
     );
   }
 });
-
+//------------------------------------------------------------------
+//MODULATOR FREQUENCY
 modulatorFrequencyControl.addEventListener("input", () => {
   modulatorFrequencyValue.textContent = modulatorFrequencyControl.value;
   if (modulatorOscillator) {
@@ -43,7 +62,8 @@ modulatorFrequencyControl.addEventListener("input", () => {
     );
   }
 });
-
+//------------------------------------------------------------------
+//MASTER GAIN
 masterGainControl.addEventListener("input", () => {
   masterGainValue.textContent = masterGainControl.value;
   masterGain.gain.setValueAtTime(
@@ -51,8 +71,9 @@ masterGainControl.addEventListener("input", () => {
     audioContext.currentTime
   );
 });
-
+//------------------------------------------------------------------
 // Function to start the audio context
+//------------------------------------------------------------------
 startButton.addEventListener("click", () => {
   audioContext.resume().then(() => {
     startButton.disabled = true;
@@ -60,6 +81,9 @@ startButton.addEventListener("click", () => {
   });
 });
 
+//------------------------------------------------------------------
+//Create Modulators
+//------------------------------------------------------------------
 // Create the ring modulation effect
 function createRingModulation() {
   // Carrier oscillator
@@ -80,11 +104,14 @@ function createRingModulation() {
   ringModulator = audioContext.createGain();
   modulatorOscillator.connect(ringModulator.gain);
   carrierOscillator.connect(ringModulator);
-
+  //------------------------------------------------------------------
   // Connect to master gain
+  //------------------------------------------------------------------
   ringModulator.connect(masterGain);
 
+  //------------------------------------------------------------------
   // Start oscillators
+  //------------------------------------------------------------------
   carrierOscillator.start();
   modulatorOscillator.start();
 }
